@@ -13,10 +13,10 @@ pulished under an Apache License 2.0.
 
 import math
 import numpy as np
-import random
 import re
 import PIL
 from PIL import Image, ImageEnhance, ImageOps
+import secrets
 
 _PIL_VER = tuple([int(x) for x in PIL.__version__.split(".")[:2]])
 
@@ -37,7 +37,7 @@ _RANDOM_INTERPOLATION = (Image.BILINEAR, Image.BICUBIC)
 def _interpolation(kwargs):
     interpolation = kwargs.pop("resample", Image.BILINEAR)
     if isinstance(interpolation, (list, tuple)):
-        return random.choice(interpolation)
+        return secrets.SystemRandom().choice(interpolation)
     else:
         return interpolation
 
@@ -181,7 +181,7 @@ def sharpness(img, factor, **__):
 
 def _randomly_negate(v):
     """With 50% prob, negate the value"""
-    return -v if random.random() > 0.5 else v
+    return -v if secrets.SystemRandom().random() > 0.5 else v
 
 
 def _rotate_level_to_arg(level, _hparams):
@@ -349,11 +349,11 @@ class AugmentOp:
         self.magnitude_std = self.hparams.get("magnitude_std", 0)
 
     def __call__(self, img_list):
-        if self.prob < 1.0 and random.random() > self.prob:
+        if self.prob < 1.0 and secrets.SystemRandom().random() > self.prob:
             return img_list
         magnitude = self.magnitude
         if self.magnitude_std and self.magnitude_std > 0:
-            magnitude = random.gauss(magnitude, self.magnitude_std)
+            magnitude = secrets.SystemRandom().gauss(magnitude, self.magnitude_std)
         magnitude = min(_MAX_LEVEL, max(0, magnitude))  # clip to valid range
         level_args = (
             self.level_fn(magnitude, self.hparams)
