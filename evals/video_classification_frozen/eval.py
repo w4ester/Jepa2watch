@@ -258,7 +258,7 @@ def main(args_eval, resume_preempt=False):
 
     # TRAIN LOOP
     for epoch in range(start_epoch, num_epochs):
-        logger.info('Epoch %d' % (epoch + 1))
+        logger.info('Epoch %d', (epoch + 1))
         train_acc = run_one_epoch(
             device=device,
             training=True,
@@ -289,7 +289,7 @@ def main(args_eval, resume_preempt=False):
             data_loader=val_loader,
             use_bfloat16=use_bfloat16)
 
-        logger.info('[%5d] train: %.3f%% test: %.3f%%' % (epoch + 1, train_acc, val_acc))
+        logger.info('[%5d] train: %.3f%% test: %.3f%%', epoch + 1, train_acc, val_acc)
         if rank == 0:
             csv_logger.log(epoch + 1, train_acc, val_acc)
         save_checkpoint(epoch + 1)
@@ -373,9 +373,7 @@ def run_one_epoch(
             optimizer.zero_grad()
 
         if itr % 20 == 0:
-            logger.info('[%5d] %.3f%% (loss: %.3f) [mem: %.2e]'
-                        % (itr, top1_meter.avg, loss,
-                           torch.cuda.max_memory_allocated() / 1024.**2))
+            logger.info('[%5d] %.3f%% (loss: %.3f) [mem: %.2e]', itr, top1_meter.avg, loss, torch.cuda.max_memory_allocated() / 1024.**2)
 
     return top1_meter.avg
 
