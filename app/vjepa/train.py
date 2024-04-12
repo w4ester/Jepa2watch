@@ -446,7 +446,7 @@ def main(args, resume_preempt=False):
                     return loss
 
                 def reg_fn(z):
-                    return sum([torch.sqrt(zi.var(dim=1) + 0.0001) for zi in z]) / len(z)
+                    return sum(torch.sqrt(zi.var(dim=1) + 0.0001) for zi in z) / len(z)
 
                 # Step 1. Forward
                 loss_jepa, loss_reg = 0., 0.
