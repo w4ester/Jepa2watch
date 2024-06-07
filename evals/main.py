@@ -43,7 +43,7 @@ def process_main(rank, fname, world_size, devices):
     # Load config
     params = None
     with open(fname, 'r') as y_file:
-        params = yaml.load(y_file, Loader=yaml.FullLoader)
+        params = yaml.load(y_file, Loader=yaml.SafeLoader)
         logger.info('loaded params...')
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(params)
