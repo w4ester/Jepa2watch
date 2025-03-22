@@ -115,7 +115,7 @@ def launch():
     # -- to run in a slurm job array
     if args.batch_launch:
         with open(args.fname, 'r') as y_file:
-            config_fnames = yaml.load(y_file, Loader=yaml.FullLoader)
+            config_fnames = yaml.load(y_file, Loader=yaml.SafeLoader)
     # ---------------------------------------------------------------------- #
 
     # ---------------------------------------------------------------------- #
@@ -125,7 +125,7 @@ def launch():
     configs = []
     for f in config_fnames:
         with open(f, 'r') as y_file:
-            _params = yaml.load(y_file, Loader=yaml.FullLoader)
+            _params = yaml.load(y_file, Loader=yaml.SafeLoader)
             nodes = int(_params.get('nodes'))
             tasks_per_node = int(_params.get('tasks_per_node'))
             configs += [_params]
