@@ -11,8 +11,8 @@ https://github.com/rwightman/pytorch-image-models/blob/master/timm/data/random_e
 pulished under an Apache License 2.0.
 """
 import math
-import random
 import torch
+import secrets
 
 
 def _get_pixels(
@@ -85,25 +85,25 @@ class RandomErasing:
         self.device = device
 
     def _erase(self, img, chan, img_h, img_w, dtype):
-        if random.random() > self.probability:
+        if secrets.SystemRandom().random() > self.probability:
             return
         area = img_h * img_w
         count = (
             self.min_count
             if self.min_count == self.max_count
-            else random.randint(self.min_count, self.max_count)
+            else secrets.SystemRandom().randint(self.min_count, self.max_count)
         )
         for _ in range(count):
             for _ in range(10):
                 target_area = (
-                    random.uniform(self.min_area, self.max_area) * area / count
+                    secrets.SystemRandom().uniform(self.min_area, self.max_area) * area / count
                 )
-                aspect_ratio = math.exp(random.uniform(*self.log_aspect_ratio))
+                aspect_ratio = math.exp(secrets.SystemRandom().uniform(*self.log_aspect_ratio))
                 h = int(round(math.sqrt(target_area * aspect_ratio)))
                 w = int(round(math.sqrt(target_area / aspect_ratio)))
                 if w < img_w and h < img_h:
-                    top = random.randint(0, img_h - h)
-                    left = random.randint(0, img_w - w)
+                    top = secrets.SystemRandom().randint(0, img_h - h)
+                    left = secrets.SystemRandom().randint(0, img_w - w)
                     img[:, top:top + h, left:left + w] = _get_pixels(
                         self.per_pixel,
                         self.rand_color,
@@ -123,25 +123,25 @@ class RandomErasing:
         img_w,
         dtype,
     ):
-        if random.random() > self.probability:
+        if secrets.SystemRandom().random() > self.probability:
             return
         area = img_h * img_w
         count = (
             self.min_count
             if self.min_count == self.max_count
-            else random.randint(self.min_count, self.max_count)
+            else secrets.SystemRandom().randint(self.min_count, self.max_count)
         )
         for _ in range(count):
             for _ in range(100):
                 target_area = (
-                    random.uniform(self.min_area, self.max_area) * area / count
+                    secrets.SystemRandom().uniform(self.min_area, self.max_area) * area / count
                 )
-                aspect_ratio = math.exp(random.uniform(*self.log_aspect_ratio))
+                aspect_ratio = math.exp(secrets.SystemRandom().uniform(*self.log_aspect_ratio))
                 h = int(round(math.sqrt(target_area * aspect_ratio)))
                 w = int(round(math.sqrt(target_area / aspect_ratio)))
                 if w < img_w and h < img_h:
-                    top = random.randint(0, img_h - h)
-                    left = random.randint(0, img_w - w)
+                    top = secrets.SystemRandom().randint(0, img_h - h)
+                    left = secrets.SystemRandom().randint(0, img_w - w)
                     for i in range(batch_start, batch_size):
                         img_instance = img[i]
                         img_instance[
