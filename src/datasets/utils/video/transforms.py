@@ -7,7 +7,6 @@
 
 import math
 import numpy as np
-import random
 import numbers
 import PIL
 from PIL import Image
@@ -19,6 +18,7 @@ from torchvision import transforms
 
 import src.datasets.utils.video.functional as FF
 from src.datasets.utils.video.randaugment import rand_augment_transform
+import secrets
 
 
 _pil_interpolation_to_str = {
@@ -508,12 +508,12 @@ def _get_param_spatial_crop(
     """
     for _ in range(num_repeat):
         area = height * width
-        target_area = random.uniform(*scale) * area
+        target_area = secrets.SystemRandom().uniform(*scale) * area
         if log_scale:
             log_ratio = (math.log(ratio[0]), math.log(ratio[1]))
-            aspect_ratio = math.exp(random.uniform(*log_ratio))
+            aspect_ratio = math.exp(secrets.SystemRandom().uniform(*log_ratio))
         else:
-            aspect_ratio = random.uniform(*ratio)
+            aspect_ratio = secrets.SystemRandom().uniform(*ratio)
 
         w = int(round(math.sqrt(target_area * aspect_ratio)))
         h = int(round(math.sqrt(target_area / aspect_ratio)))
@@ -522,8 +522,8 @@ def _get_param_spatial_crop(
             w, h = h, w
 
         if 0 < w <= width and 0 < h <= height:
-            i = random.randint(0, height - h)
-            j = random.randint(0, width - w)
+            i = secrets.SystemRandom().randint(0, height - h)
+            j = secrets.SystemRandom().randint(0, width - w)
             return i, j, h, w
 
     # Fallback to central crop
@@ -741,16 +741,16 @@ class RandomResizedCropAndInterpolation:
         area = img.size[0] * img.size[1]
 
         for _ in range(10):
-            target_area = random.uniform(*scale) * area
+            target_area = secrets.SystemRandom().uniform(*scale) * area
             log_ratio = (math.log(ratio[0]), math.log(ratio[1]))
-            aspect_ratio = math.exp(random.uniform(*log_ratio))
+            aspect_ratio = math.exp(secrets.SystemRandom().uniform(*log_ratio))
 
             w = int(round(math.sqrt(target_area * aspect_ratio)))
             h = int(round(math.sqrt(target_area / aspect_ratio)))
 
             if w <= img.size[0] and h <= img.size[1]:
-                i = random.randint(0, img.size[1] - h)
-                j = random.randint(0, img.size[0] - w)
+                i = secrets.SystemRandom().randint(0, img.size[1] - h)
+                j = secrets.SystemRandom().randint(0, img.size[0] - w)
                 return i, j, h, w
 
         # Fallback to central crop
@@ -777,7 +777,7 @@ class RandomResizedCropAndInterpolation:
         """
         i, j, h, w = self.get_params(img, self.scale, self.ratio)
         if isinstance(self.interpolation, (tuple, list)):
-            interpolation = random.choice(self.interpolation)
+            interpolation = secrets.choice(self.interpolation)
         else:
             interpolation = self.interpolation
         return F.resized_crop(img, i, j, h, w, self.size, interpolation)
@@ -829,7 +829,7 @@ class RandomHorizontalFlip(object):
         Returns:
         PIL.Image or numpy.ndarray: Randomly flipped clip
         """
-        if random.random() < 0.5:
+        if secrets.SystemRandom().random() < 0.5:
             if isinstance(clip[0], np.ndarray):
                 return [np.fliplr(img) for img in clip]
             elif isinstance(clip[0], PIL.Image.Image):
@@ -857,7 +857,7 @@ class RandomResize(object):
         self.interpolation = interpolation
 
     def __call__(self, clip):
-        scaling_factor = random.uniform(self.ratio[0], self.ratio[1])
+        scaling_factor = secrets.SystemRandom().uniform(self.ratio[0], self.ratio[1])
 
         if isinstance(clip[0], np.ndarray):
             im_h, im_w, im_c = clip[0].shape
@@ -929,8 +929,8 @@ class RandomCrop(object):
                     im_w=im_w, im_h=im_h, w=w, h=h))
             raise ValueError(error_msg)
 
-        x1 = random.randint(0, im_w - w)
-        y1 = random.randint(0, im_h - h)
+        x1 = secrets.SystemRandom().randint(0, im_w - w)
+        y1 = secrets.SystemRandom().randint(0, im_h - h)
         cropped = FF.crop_clip(clip, y1, x1, h, w)
 
         return cropped
@@ -1014,7 +1014,7 @@ class RandomRotation(object):
         PIL.Image or numpy.ndarray: Cropped list of images
         """
         import skimage
-        angle = random.uniform(self.degrees[0], self.degrees[1])
+        angle = secrets.SystemRandom().uniform(self.degrees[0], self.degrees[1])
         if isinstance(clip[0], np.ndarray):
             rotated = [skimage.transform.rotate(img, angle) for img in clip]
         elif isinstance(clip[0], PIL.Image.Image):
@@ -1093,25 +1093,22 @@ class ColorJitter(object):
 
     def get_params(self, brightness, contrast, saturation, hue):
         if brightness > 0:
-            brightness_factor = random.uniform(
-                max(0, 1 - brightness), 1 + brightness)
+            brightness_factor = secrets.SystemRandom().uniform(max(0, 1 - brightness), 1 + brightness)
         else:
             brightness_factor = None
 
         if contrast > 0:
-            contrast_factor = random.uniform(
-                max(0, 1 - contrast), 1 + contrast)
+            contrast_factor = secrets.SystemRandom().uniform(max(0, 1 - contrast), 1 + contrast)
         else:
             contrast_factor = None
 
         if saturation > 0:
-            saturation_factor = random.uniform(
-                max(0, 1 - saturation), 1 + saturation)
+            saturation_factor = secrets.SystemRandom().uniform(max(0, 1 - saturation), 1 + saturation)
         else:
             saturation_factor = None
 
         if hue > 0:
-            hue_factor = random.uniform(-hue, hue)
+            hue_factor = secrets.SystemRandom().uniform(-hue, hue)
         else:
             hue_factor = None
         return brightness_factor, contrast_factor, saturation_factor, hue_factor
@@ -1140,7 +1137,7 @@ class ColorJitter(object):
                 img_transforms.append(lambda img: torchvision.transforms.functional.adjust_hue(img, hue))
             if contrast is not None:
                 img_transforms.append(lambda img: torchvision.transforms.functional.adjust_contrast(img, contrast))
-            random.shuffle(img_transforms)
+            secrets.SystemRandom().shuffle(img_transforms)
 
             # Apply to all images
             jittered_clip = []
